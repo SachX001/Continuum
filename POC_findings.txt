@@ -1,0 +1,19 @@
+POC Finding #01
+
+Claude Desktop exposes the active conversation through the
+Windows UI Automation RootWebArea.
+
+The RootWebArea exposes TextPattern.
+
+Calling DocumentRange.GetText(-1) successfully retrieved the
+complete contents of the largest available test conversation
+(a semester-notes thread) without requiring manual scrolling.
+
+Observed output: ~3186 lines.
+
+The conversation contained structured educational content,
+including maps, mind maps, and block-diagram representations.
+
+Result: PASS
+
+Confidence: HIGH for the tested Claude Desktop build/version.

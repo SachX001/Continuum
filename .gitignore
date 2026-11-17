@@ -1,0 +1,21 @@
+# CMake/Ninja build output
+/build/
+
+# Local runtime data and captured conversations
+/output/
+
+# IDE and editor state
+/.vscode/
+*.user
+*.suo
+
+# Local OS files
+Thumbs.db
+Desktop.ini
+
+# Test/runtime databases and logs, including accidental nested copies
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
