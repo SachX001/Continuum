@@ -431,6 +431,10 @@ int main() {
             && revision_prompt_text.find("source-message-2-code-1")
                 != std::string::npos
             && revision_prompt_text.find("source-message-4-code-1")
+                != std::string::npos
+            && revision_prompt_text.find("supersedes_id")
+                != std::string::npos
+            && revision_prompt_text.find("revision_of")
                 != std::string::npos,
         "both original and corrected implementations retain exact source evidence"
     );

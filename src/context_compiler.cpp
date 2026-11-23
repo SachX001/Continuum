@@ -71,6 +71,32 @@ bool starts_with(const std::string& value, const std::string& prefix) {
         && value.compare(0, prefix.size(), prefix) == 0;
 }
 
+std::string lowercase_copy(const std::string& value) {
+    std::string result = value;
+    std::transform(
+        result.begin(), result.end(), result.begin(),
+        [](unsigned char character) {
+            return static_cast<char>(std::tolower(character));
+        }
+    );
+    return result;
+}
+
+bool contains_revision_language(const std::string& value) {
+    const std::string lowered = lowercase_copy(value);
+    return lowered.find("supersed") != std::string::npos
+        || lowered.find("corrected implementation") != std::string::npos
+        || lowered.find("correction") != std::string::npos
+        || lowered.find("revised implementation") != std::string::npos;
+}
+
+std::string artifact_identifier(const CodeArtifact& artifact) {
+    return "source-message-"
+        + std::to_string(artifact.message_index)
+        + "-code-"
+        + std::to_string(artifact.artifact_index);
+}
+
 bool is_language_label(const std::string& value) {
     static const std::vector<std::string> languages = {
         "python", "javascript", "typescript", "java", "kotlin",
@@ -568,6 +594,44 @@ std::vector<CodeArtifact> extract_code_artifacts(const json& conversation) {
         );
     }
 
+    // Preserve explicit revision relationships found in the conversation.
+    // Link only a later artifact to the immediately preceding artifact when
+    // explicit correction/supersession language appears in the later history.
+    for (auto& artifact : artifacts) {
+        if (artifact.id.empty()) {
+            artifact.id = artifact_identifier(artifact);
+        }
+    }
+
+    for (std::size_t index = 1; index < artifacts.size(); ++index) {
+        auto& previous = artifacts[index - 1];
+        auto& current = artifacts[index];
+
+        if (current.message_index <= previous.message_index
+            || current.supersedes_id.has_value()
+            || current.revision_of.has_value()) {
+            continue;
+        }
+
+        std::string revision_evidence;
+        for (std::size_t message_index = previous.message_index;
+             message_index < conversation["messages"].size();
+             ++message_index) {
+            const auto& message = conversation["messages"][message_index];
+            if (message.is_object()
+                && message.contains("content")
+                && message["content"].is_string()) {
+                revision_evidence += message["content"].get<std::string>();
+                revision_evidence.push_back('\n');
+            }
+        }
+
+        if (contains_revision_language(revision_evidence)) {
+            current.supersedes_id = previous.id;
+            current.revision_of = previous.id;
+        }
+    }
+
     return artifacts;
 }
 
@@ -577,10 +641,7 @@ json artifacts_to_json(const std::vector<CodeArtifact>& artifacts) {
     for (const auto& artifact : artifacts) {
         json item = json::object();
         item["id"] = artifact.id.empty()
-            ? "source-message-"
-                + std::to_string(artifact.message_index)
-                + "-code-"
-                + std::to_string(artifact.artifact_index)
+            ? artifact_identifier(artifact)
             : artifact.id;
         item["type"] = artifact.type;
         item["source_role"] = artifact.source_role;

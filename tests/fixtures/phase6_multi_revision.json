@@ -1,0 +1,25 @@
+{
+  "title": "Parser revision transfer benchmark",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Implement a C++ conversation parser that preserves code blocks."
+    },
+    {
+      "role": "assistant",
+      "content": "The first implementation trims every repeated marker.\n```cpp\nstd::string parse_message(const std::string& input) {\n    return trim(input);\n}\n```"
+    },
+    {
+      "role": "user",
+      "content": "Debugging: a repeated marker inside a later code block causes the rest of the source to disappear. The first implementation also loses the original formatting."
+    },
+    {
+      "role": "assistant",
+      "content": "The corrected implementation preserves code blocks and keeps the original source available.\n```cpp\nstd::string parse_message(const std::string& input) {\n    auto normalized = normalize_markers(input);\n    return trim_preserving_code(normalized);\n}\n```"
+    },
+    {
+      "role": "user",
+      "content": "Use the corrected implementation. It explicitly supersedes the first implementation because it preserves code blocks after the duplicate-marker bug was found. Continue from parser-v2 and keep the source provenance."
+    }
+  ]
+}

@@ -23,14 +23,20 @@ int main(int argc, char* argv[]) {
         const std::string model =
             argc > 2 ? argv[2] : "continuum-context";
         const std::filesystem::path prompt_path =
-            "output/context/compilation_prompt.md";
+            argc > 3 ? argv[3] : "output/context/compilation_prompt.md";
+        const std::filesystem::path conversation_path =
+            argc > 4 ? argv[4] : "output/parsed_conversation.json";
+        const std::filesystem::path output_dir =
+            prompt_path.parent_path().empty()
+                ? std::filesystem::path(".")
+                : prompt_path.parent_path();
         const std::filesystem::path temporary_package =
-            "output/context/context_package.generated.json";
+            output_dir / "context_package.generated.json";
         const std::filesystem::path package_path =
-            "output/context/context_package.json";
+            output_dir / "context_package.json";
 
         if (!continuum::ContextCompiler::build_prompt(
-                "output/parsed_conversation.json",
+                conversation_path,
                 prompt_path)) {
             std::cerr << "Failed to generate compilation prompt.\n";
             return 1;
@@ -607,9 +613,13 @@ int main(int argc, char* argv[]) {
     }
 
     if (argc > 1 && std::string(argv[1]) == "--compile-context") {
+    const std::filesystem::path conversation_path =
+        argc > 2 ? argv[2] : "output/parsed_conversation.json";
+    const std::filesystem::path prompt_path =
+        argc > 3 ? argv[3] : "output/context/compilation_prompt.md";
     const bool success = continuum::ContextCompiler::build_prompt(
-        "output/parsed_conversation.json",
-        "output/context/compilation_prompt.md"
+        conversation_path,
+        prompt_path
     );
 
     if (!success) {
@@ -625,10 +635,14 @@ int main(int argc, char* argv[]) {
 
     if (argc > 1 && std::string(argv[1]) == "--build-memory-prompt") {
         std::string error;
+        const std::filesystem::path package_path =
+            argc > 2 ? argv[2] : "output/context/context_package.json";
+        const std::filesystem::path prompt_path =
+            argc > 3 ? argv[3] : "output/context/memory_update_prompt.md";
 
         if (!continuum::ContextCompiler::build_memory_prompt(
-                "output/context/context_package.json",
-                "output/context/memory_update_prompt.md",
+                package_path,
+                prompt_path,
                 error)) {
             std::cerr << "Failed to build memory update prompt: "
                       << error << '\n';
@@ -641,9 +655,11 @@ int main(int argc, char* argv[]) {
 
     if (argc > 1 && std::string(argv[1]) == "--validate-context") {
     std::string error;
+    const std::filesystem::path package_path =
+        argc > 2 ? argv[2] : "output/context/context_package.json";
 
     const bool valid = continuum::ContextCompiler::validate_package(
-        "output/context/context_package.json",
+        package_path,
         error
     );
 
@@ -654,7 +670,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Context package validation PASSED.\n";
-    std::cout << "File: output/context/context_package.json\n";
+    std::cout << "File: " << package_path.string() << '\n';
 
     return 0;
     }
