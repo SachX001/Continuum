@@ -43,6 +43,12 @@ Run the regression tests:
 ctest --test-dir build --output-on-failure
 ```
 
+Create a distributable ZIP package:
+
+```bash
+cpack --config build/CPackConfig.cmake -B build/packages
+```
+
 ## Main workflow
 
 Capture and compile a Claude conversation:
@@ -81,6 +87,7 @@ See:
 
 - [`docs/continuum-architecture-roadmap.md`](docs/continuum-architecture-roadmap.md)
 - [`docs/episodic-memory-architecture.md`](docs/episodic-memory-architecture.md)
+- [`docs/mvp-release-checklist.md`](docs/mvp-release-checklist.md)
 
 ## Known limitations
 

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 project(continuum_uia_poc LANGUAGES CXX)
 
+set(CONTINUUM_VERSION 0.1.0)
+
 find_package(SQLite3 REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -38,3 +40,23 @@ add_test(
     NAME context_compiler_regression
     COMMAND continuum-context-tests
 )
+
+include(GNUInstallDirs)
+
+install(TARGETS continuum-uia-poc
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(FILES
+    README.md
+    POC_findings.txt
+    DESTINATION .
+)
+install(DIRECTORY docs DESTINATION .)
+
+set(CPACK_PACKAGE_NAME "Continuum")
+set(CPACK_PACKAGE_VERSION "${CONTINUUM_VERSION}")
+set(CPACK_PACKAGE_VENDOR "Continuum")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+    "Local-first AI conversation context transfer tool")
+set(CPACK_GENERATOR "ZIP")
+include(CPack)
