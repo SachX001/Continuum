@@ -4,6 +4,7 @@
 #include "../include/nlohmann/json.hpp"
 
 #include <filesystem>
+#include <sqlite3.h>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -109,6 +110,68 @@ int main() {
 
     bool passed = true;
     std::string error;
+
+    const auto legacy_database = root / "legacy-v1.sqlite";
+    sqlite3* legacy_handle = nullptr;
+    const bool legacy_opened = sqlite3_open(
+        legacy_database.string().c_str(), &legacy_handle
+    ) == SQLITE_OK;
+    bool legacy_created = legacy_opened;
+    if (legacy_created) {
+        char* legacy_error = nullptr;
+        legacy_created = sqlite3_exec(
+            legacy_handle,
+            "CREATE TABLE schema_version (version INTEGER NOT NULL);"
+            "INSERT INTO schema_version(version) VALUES (1);",
+            nullptr,
+            nullptr,
+            &legacy_error
+        ) == SQLITE_OK;
+        if (legacy_error) {
+            sqlite3_free(legacy_error);
+        }
+    }
+    if (legacy_handle) {
+        sqlite3_close(legacy_handle);
+    }
+    passed &= check(
+        legacy_created,
+        "legacy schema fixture is created"
+    );
+    {
+        continuum::EvidenceRepository migrated(legacy_database);
+        error.clear();
+        passed &= check(
+            legacy_created && migrated.initialize(error),
+            "legacy schema migrates successfully"
+        );
+    }
+    sqlite3* migrated_handle = nullptr;
+    const bool migrated_opened = sqlite3_open(
+        legacy_database.string().c_str(), &migrated_handle
+    ) == SQLITE_OK;
+    int migrated_version = 0;
+    if (migrated_opened) {
+        sqlite3_stmt* statement = nullptr;
+        if (sqlite3_prepare_v2(
+                migrated_handle,
+                "SELECT version FROM schema_version LIMIT 1;",
+                -1,
+                &statement,
+                nullptr
+            ) == SQLITE_OK
+            && sqlite3_step(statement) == SQLITE_ROW) {
+            migrated_version = sqlite3_column_int(statement, 0);
+        }
+        if (statement) {
+            sqlite3_finalize(statement);
+        }
+        sqlite3_close(migrated_handle);
+    }
+    passed &= check(
+        migrated_opened && migrated_version == 7,
+        "legacy schema reaches the current migration version"
+    );
 
     const auto no_code_input = root / "no-code.json";
     const auto no_code_prompt = root / "no-code.md";
