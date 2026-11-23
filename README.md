@@ -306,6 +306,12 @@ Continuum is local-first:
 - Embeddings, graph traversal, background synchronization, cloud storage, and multi-provider support are deferred beyond the MVP.
 - Structured log aggregation and artifact signing are not included in the MVP.
 
+## Media and project overview
+
+- [Continuum architecture diagram](docs/media/continuum-architecture.svg)
+- [LinkedIn demo storyboard](docs/media/linkedin-demo-storyboard.md)
+- [GitHub repository](https://github.com/SachX001/Continuum)
+
 ## Project documentation
 
 - [`docs/continuum-architecture-roadmap.md`](docs/continuum-architecture-roadmap.md) — phased architecture and implementation plan
