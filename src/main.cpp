@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
         if (!continuum::ContextCompiler::build_prompt(
                 conversation_path,
                 prompt_path)) {
-            std::cerr << "Failed to generate compilation prompt.\n";
+            std::cerr << "Failed to generate compilation prompt from: "
+                      << conversation_path.string() << '\n';
             return 1;
         }
 
@@ -121,7 +122,7 @@ int main(int argc, char* argv[]) {
 
         std::cout << "Local context package generated successfully.\n"
                   << "Model: " << model << '\n'
-                  << "Output: output/context/context_package.json\n";
+                  << "Output: " << package_path.string() << '\n';
         return 0;
     }
 
@@ -213,7 +214,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Project context package generated successfully.\n"
                   << "Project: " << project_id << "\n"
                   << "Model: " << model << '\n'
-                  << "Output: output/context/context_package.json\n";
+                  << "Output: " << package_path.string() << '\n';
         return 0;
     }
 

@@ -596,6 +596,14 @@ At 8–12 hours per week, calendar estimates include normal interruptions, learn
 
 **Acceptance criteria:** core tests pass in CI; fixture imports are repeatable; backups restore; packages are versioned and validated; critical failures do not silently produce authoritative memory.
 
+The first stabilization regression verifies that malformed compilation input
+fails before model generation and cannot overwrite an existing context package.
+Run it with:
+
+```powershell
+.\tests\phase7_stabilization.ps1
+```
+
 **Risks:** scope creep, Claude UI changes, insufficient time for evaluation.  
 **Postpone:** GUI, automatic sync, multiple simultaneous providers, custom compression models.
 
